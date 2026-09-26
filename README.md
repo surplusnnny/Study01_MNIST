@@ -4,12 +4,16 @@
 마우스나 손가락으로 숫자를 그리면 합성곱 신경망(CNN)이 0~9 중 어떤 숫자인지 실시간으로 인식합니다.
 MNIST 테스트 정확도는 **99.48%** 입니다.
 
+**바로 써 보기:** https://surplusnnny.github.io/Study01_MNIST/ (웹 버전, 휴대폰에서도 동작)
+
 | 버전 | 특징 | 안내 |
 |---|---|---|
 | [데스크톱](desktop_version/) | PyTorch 학습, tkinter 그림판, 바탕 화면 바로가기(Windows) | [desktop_version/README.md](desktop_version/README.md) |
 | [웹](web_version/) | 외부 라이브러리 없이 순수 자바스크립트로 브라우저 안에서 추론, 정적 호스팅 가능, 터치 지원 | 아래 참고 |
 
 ## 웹 버전 실행
+
+`main`에 push하면 GitHub Actions가 테스트를 통과한 `web_version/`을 위 주소에 자동으로 배포합니다. 로컬에서 확인하려면:
 
 ```bash
 cd web_version

@@ -44,4 +44,9 @@ cd web_version
 python -m http.server 8000 --bind 127.0.0.1   # 웹 버전 로컬 확인
 ```
 
-GitHub Pages 배포 설정은 아직 없습니다. Pages는 브랜치 방식으로 루트나 `/docs`만 올릴 수 있어서, `web_version/`을 올리려면 GitHub Actions 워크플로 등이 필요합니다.
+## GitHub Pages 배포
+
+- 주소: https://surplusnnny.github.io/Study01_MNIST/
+- `.github/workflows/pages.yml`이 `main`에 push될 때마다 `web_version`에서 `node --test`를 돌리고, 통과하면 `web_version/` 폴더만 Pages에 올립니다. 테스트가 실패하면 배포하지 않습니다.
+- 저장소 설정의 Pages Source는 "GitHub Actions"여야 합니다(브랜치 방식은 루트나 `/docs`만 올릴 수 있어 `web_version/`을 올릴 수 없음).
+- 워크플로의 job·step id는 GitHub 문법상 영문이어야 하므로, 한글 규칙의 예외로 영문 id를 쓰고 `name`만 한글로 답니다.
