@@ -6,16 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 PyTorch CNN으로 MNIST를 학습하고, tkinter 그림판에 마우스로 그린 숫자를 실시간으로 인식하는 Windows용 프로젝트입니다.
 사용자 요청에 따라 **모든 코드·주석·식별자(변수, 함수, 클래스 이름)를 한글로** 작성합니다. 새 코드도 이 방식을 따르세요.
+이 폴더는 저장소의 **데스크톱 버전이자 학습·가중치의 원본**입니다. 웹 버전(`../web_version`)은 여기서 내보낸 산출물만 씁니다. 저장소 전체 규칙은 루트 `CLAUDE.md`를 보세요.
 
 ## 명령어
 
-프로젝트 전용 가상환경 `.venv`를 사용합니다. 기본 `python`에는 torch가 없으므로 반드시 venv의 파이썬을 쓰세요.
+이 폴더 전용 가상환경 `.venv`(`desktop_version\.venv`)를 사용하고, **모든 명령은 desktop_version 폴더 안에서** 실행합니다. 기본 `python`에는 torch가 없으므로 반드시 venv의 파이썬을 쓰세요.
 PowerShell에서 한글 출력이 깨지면 `$env:PYTHONIOENCODING='utf-8'`를 먼저 지정하세요.
 
 ```bash
 .venv\Scripts\python.exe train.py          # 학습 → mnist_cnn.pt 저장 (CPU 약 7분, data/에 MNIST 자동 다운로드)
 .venv\Scripts\python.exe app.py            # 그림판 앱 실행 (콘솔에 오류가 보이는 방식)
 .venv\Scripts\python.exe make_icon.py      # icon.ico, icon_preview.png 다시 만들기
+.venv\Scripts\python.exe export_web.py     # ../web_version/model/ 과 ../web_version/tests/fixtures/ 다시 만들기
 powershell -ExecutionPolicy Bypass -File create_shortcut.ps1   # 바탕 화면 바로가기 다시 만들기
 ```
 
@@ -28,7 +30,7 @@ powershell -ExecutionPolicy Bypass -File create_shortcut.ps1   # 바탕 화면 �
 
 - **`model.py`의 `숫자인식CNN`** 을 `train.py`와 `app.py`가 함께 씁니다. `mnist_cnn.pt`는 `state_dict`만 저장하므로, 모델 구조를 바꾸면 기존 가중치를 불러올 수 없어 `train.py`로 다시 학습해야 합니다.
 - **정규화 상수**(`MNIST_평균=0.1307`, `MNIST_표준편차=0.3081`)가 `train.py`와 `app.py`에 **따로** 정의되어 있습니다. 한쪽을 바꾸면 다른 쪽도 같이 바꾸세요.
-- `train.py`는 테스트 정확도가 가장 높았던 에폭의 가중치만 저장합니다. 학습 데이터에는 회전·이동·확대 증강을 적용하는데, 사람이 그린 숫자를 잘 인식하게 하려는 목적입니다.
+- `train.py`는 테스트 정확도가 가장 높았던 에폭의 가중치만 저장합니다. 학습 데이터에는 회전·이동·확대 증강을 적용하는데, 사람이 그린 숫자를 잘 인식하게 하려는 목적입니다. `train.py`는 `mnist_cnn.pt`와 `./data`를 작업 폴더 기준 상대 경로로 쓰므로 반드시 이 폴더에서 실행하세요.
 - **`app.py`의 입력 흐름**
   - 획은 화면용 `tk.Canvas`와, 인식에 쓰는 메모리 속 PIL 흑백 이미지(검은 배경에 흰 글씨) 두 곳에 **동시에** 그립니다. 그리기 코드를 고칠 때는 두 곳을 함께 고쳐야 합니다.
   - `MNIST형식으로_변환()`은 MNIST를 만든 방식을 그대로 따라 합니다: 숫자 영역 자르기 → 긴 변을 20px로 축소 → 28×28 가운데에 배치 → 무게중심을 (14,14)로 이동 → 정규화. 반환값은 `(텐서, 28x28 이미지)`이고, 그린 것이 없으면 `None`입니다.
@@ -37,6 +39,10 @@ powershell -ExecutionPolicy Bypass -File create_shortcut.ps1   # 바탕 화면 �
   - venv의 `pythonw.exe`는 실제로는 `C:\ProgramData\Anaconda3\pythonw.exe`를 띄웁니다. 그래서 작업 표시줄에서 고정한 아이콘과 실행 중인 창을 묶으려면 AppUserModelID가 필요합니다.
   - AppUserModelID `Study01.MNIST.HandwritingRecognizer`는 `app.py`의 `앱ID`와 `create_shortcut.ps1`의 `$앱ID` **두 곳에서 같아야** 합니다.
   - `app.py`는 가중치·아이콘 경로를 `__file__` 기준 절대 경로로 찾기 때문에, 작업 폴더와 상관없이 실행됩니다.
+- **`export_web.py`** 는 `app.py`의 `모델_불러오기`·`MNIST형식으로_변환`·정규화 상수를 import해서 웹 버전 파일을 **덮어씁니다**.
+  - 배치정규화를 합성곱에 합쳐 `../web_version/model/model.json`, `weights.bin`을 만들고, 합친 모델 출력이 원래 모델과 1e-4 이내인지 스스로 확인합니다.
+  - MNIST 테스트 500장과 극단적인 입력 몇 가지로 `../web_version/tests/fixtures/`의 기준값을 만듭니다.
+  - `mnist_cnn.pt`, 모델 구조, `MNIST형식으로_변환()`, 정규화 상수 중 하나라도 바꾸면 이 스크립트를 다시 실행하고, `web_version`에서 `node --test`로 확인하세요. 전처리를 바꿨다면 `../web_version/js/preprocess.js`도 같이 고쳐야 합니다.
 
 ## 주의할 점
 

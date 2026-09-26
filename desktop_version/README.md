@@ -14,7 +14,7 @@ MNIST 데이터셋으로 학습했으며, 테스트 정확도는 **99.48%** 입�
 ## 프로젝트 구조
 
 ```
-study01_MNIST/
+desktop_version/
 ├── model.py       # CNN 모델 정의
 ├── train.py       # MNIST 학습 및 가중치 저장
 ├── app.py         # tkinter 그림판 + 실시간 인식 프로그램
@@ -22,10 +22,13 @@ study01_MNIST/
 ├── create_shortcut.ps1  # 바탕 화면 바로가기 생성
 ├── icon.ico       # 앱·바로가기 아이콘
 ├── mnist_cnn.pt   # 학습된 가중치 (train.py 실행 시 생성)
-└── data/          # MNIST 데이터셋 (train.py 실행 시 자동 다운로드)
+├── data/          # MNIST 데이터셋 (train.py 실행 시 자동 다운로드)
+└── export_web.py  # 웹 버전(../web_version)용 가중치·테스트 기준값 내보내기
 ```
 
 ## 설치
+
+> 아래 명령은 모두 **desktop_version 폴더 안에서** 실행합니다. 웹 버전은 [../web_version](../web_version)을 보세요.
 
 Python 3.10 이상이 필요합니다. (Python 3.14에서 확인)
 
@@ -77,6 +80,7 @@ powershell -ExecutionPolicy Bypass -File create_shortcut.ps1
 - 앱과 바로가기에 같은 AppUserModelID가 들어 있어서, 고정한 아이콘과 실행 중인 창이 하나로 묶입니다.
 - 아이콘을 바꾸려면 `make_icon.py`를 고쳐 실행한 뒤 바로가기를 다시 만드세요.
 - 프로젝트 폴더를 옮기면 바로가기가 옛 경로를 가리키므로 스크립트를 다시 실행해야 합니다.
+- 저장소를 web_version/desktop_version으로 나눈 뒤에는 바로가기를 한 번 다시 만들어야 합니다.
 
 ## 모델 구조
 
