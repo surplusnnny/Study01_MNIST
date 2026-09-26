@@ -1,0 +1,97 @@
+/* 생성: 2026-09-27 01:30 KST */
+/* 손글씨 숫자 인식기 화면 스타일. 색은 :root 변수로 두고 어두운 화면 설정에서 바꾼다. */
+:root {
+  --배경: #f6f7f9;
+  --면: #ffffff;
+  --글자: #1d2330;
+  --흐린글자: #5b6475;
+  --선: #d5d9e0;
+  --강조: #2b7de9;
+  --옅은강조: #9bbce8;
+  --막대바탕: #eceff3;
+  --오류: #c62828;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --배경: #14171c;
+    --면: #1d2129;
+    --글자: #e7eaf0;
+    --흐린글자: #9aa3b2;
+    --선: #353b46;
+    --강조: #5a9cf0;
+    --옅은강조: #3f5f8a;
+    --막대바탕: #2a2f38;
+    --오류: #ef7b7b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--배경);
+  color: var(--글자);
+  font-family: "맑은 고딕", "Malgun Gothic", system-ui, sans-serif;
+}
+
+.앱 { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+h1 { font-size: 1.4rem; margin: 0 0 4px; }
+.설명 { margin: 0 0 20px; color: var(--흐린글자); font-size: 0.9rem; }
+.제목 { margin: 0 0 6px; font-size: 0.95rem; }
+.작게 { margin-top: 12px; font-size: 0.8rem; color: var(--흐린글자); }
+
+/* 좁은 화면에서는 결과 영역이 그림판 아래로 내려간다 */
+.본문 { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+.그림판영역 { flex: 0 1 280px; min-width: 0; }
+.결과영역 { flex: 1 1 240px; min-width: 0; }
+
+/* 내부 해상도는 항상 280x280이고 화면에서는 폭에 맞춰 줄어든다.
+   테두리(border)는 좌표 계산을 어긋나게 하므로 outline을 쓴다. */
+#그림판 {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  aspect-ratio: 1;
+  background: #000;
+  outline: 1px solid var(--선);
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.버튼줄 { display: flex; justify-content: space-between; max-width: 280px; margin-top: 8px; }
+
+button {
+  font: inherit;
+  padding: 6px 18px;
+  border: 1px solid var(--선);
+  border-radius: 6px;
+  background: var(--면);
+  color: var(--글자);
+  cursor: pointer;
+}
+button:disabled { opacity: 0.5; cursor: default; }
+
+.예측숫자 { font-size: 64px; font-weight: 700; line-height: 1.1; }
+.확신도 { margin: 0 0 8px; font-size: 0.9rem; }
+
+.확률막대 { list-style: none; margin: 0; padding: 0; max-width: 260px; }
+.확률막대 li {
+  display: grid;
+  grid-template-columns: 16px 1fr 40px;
+  gap: 6px;
+  align-items: center;
+  height: 20px;
+  font-size: 0.85rem;
+}
+.막대 { height: 12px; border-radius: 2px; background: var(--막대바탕); overflow: hidden; }
+.채움 { display: block; height: 100%; width: 0; background: var(--옅은강조); }
+.최고 .채움 { background: var(--강조); }
+.퍼센트 { text-align: right; color: var(--흐린글자); font-variant-numeric: tabular-nums; }
+
+#미리보기 { display: block; width: 112px; height: 112px; background: #000; image-rendering: pixelated; }
+
+.상태 { margin: 16px 0 0; color: var(--흐린글자); }
+.상태:empty { display: none; }
+.상태.오류 { color: var(--오류); }

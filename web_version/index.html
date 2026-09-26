@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- 생성: 2026-09-27 01:30 KST -->
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>손글씨 숫자 인식기</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <main class="앱">
+    <h1>손글씨 숫자 인식기</h1>
+    <p class="설명">MNIST로 학습한 CNN이 브라우저 안에서 순수 자바스크립트로 인식합니다. 그린 그림은 기기 밖으로 나가지 않습니다.</p>
+
+    <div class="본문">
+      <section class="그림판영역">
+        <p class="제목">여기에 숫자 하나를 그려 주세요</p>
+        <canvas id="그림판" width="280" height="280" aria-label="숫자를 그리는 그림판"></canvas>
+        <div class="버튼줄">
+          <button id="지우기버튼" type="button">지우기</button>
+          <button id="인식버튼" type="button" disabled>인식하기</button>
+        </div>
+      </section>
+
+      <section class="결과영역" aria-live="polite">
+        <p class="제목">인식 결과</p>
+        <div id="예측숫자" class="예측숫자">?</div>
+        <p id="확신도" class="확신도">확신도: -</p>
+        <ol id="확률막대" class="확률막대"></ol>
+        <p class="제목 작게">모델 입력(28x28)</p>
+        <canvas id="미리보기" width="28" height="28" aria-label="모델에 들어간 28x28 이미지"></canvas>
+      </section>
+    </div>
+
+    <p id="상태" class="상태">모델 불러오는 중…</p>
+  </main>
+</body>
+</html>
