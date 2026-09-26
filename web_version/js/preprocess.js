@@ -38,6 +38,21 @@ export function 경계상자(흑백, 너비, 높이) {
   return 오른 < 0 ? null : [왼, 위, 오른 + 1, 아래 + 1];
 }
 
+/**
+ * 옅은 값(기준 미만)을 0으로 만든 새 배열을 돌려준다(입력은 바꾸지 않음).
+ * 브라우저 canvas.getImageData는 구현에 따라 잡음(예: Brave·Safari 사생활 보호 모드의 +1)을 섞을 수 있고,
+ * 획 가장자리의 안티앨리어싱도 옅은 값을 남긴다. desktop_version의 PIL ImageDraw로 그린 학습용 입력에는
+ * 이런 옅은 값이 없으므로, 경계상자가 잡음까지 잉크로 잘못 재는 것을 막기 위해 미리 걸러낸다.
+ */
+export function 잡음_제거(흑백, 기준 = 16) {
+  const 결과 = new Uint8Array(흑백.length);
+  for (let i = 0; i < 흑백.length; i++) {
+    const 값 = 흑백[i];
+    결과[i] = 값 < 기준 ? 0 : 값;
+  }
+  return 결과;
+}
+
 function 싱크(x) {
   if (x === 0) return 1;
   const 각 = x * Math.PI;
@@ -53,6 +68,7 @@ function 란초스(x) {
 function 계수_계산(입력길이, 출력길이) {
   const 배율 = 입력길이 / 출력길이;
   const 필터배율 = Math.max(배율, 1);
+  const 역배율 = 1 / 필터배율; // Pillow의 ss = 1.0 / filterscale와 같다. 루프 밖에서 한 번만 구해 나눗셈 대신 곱셈을 쓴다.
   const 지지범위 = 3 * 필터배율;
   const 목록 = [];
   for (let 출력위치 = 0; 출력위치 < 출력길이; 출력위치++) {
@@ -63,7 +79,7 @@ function 계수_계산(입력길이, 출력길이) {
     const 실수계수 = [];
     let 합 = 0;
     for (let x = 시작; x < 끝; x++) {
-      const w = 란초스((x - 중심 + 0.5) / 필터배율);
+      const w = 란초스((x - 중심 + 0.5) * 역배율);
       실수계수.push(w);
       합 += w;
     }

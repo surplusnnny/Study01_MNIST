@@ -28,11 +28,20 @@ MNIST로 학습한 CNN으로 마우스·터치로 그린 숫자를 인식하는 
 
 ## 명령어 요약
 
-```bash
-cd desktop_version && .venv\Scripts\python.exe app.py   # 데스크톱 앱
-cd desktop_version && .venv\Scripts\python.exe export_web.py   # 웹용 가중치·기준값 다시 만들기
-cd web_version && node --test                           # 웹 버전 테스트
-cd web_version && python -m http.server 8000 --bind 127.0.0.1   # 웹 버전 로컬 확인
+`cd a && b` 형태는 PowerShell 5.1에서 문법 오류입니다. 폴더로 이동한 뒤 실행하는 두 줄로 씁니다.
+
+```powershell
+cd desktop_version
+.venv\Scripts\python.exe app.py            # 데스크톱 앱
+
+cd desktop_version
+.venv\Scripts\python.exe export_web.py     # 웹용 가중치·기준값 다시 만들기
+
+cd web_version
+node --test                                # 웹 버전 테스트
+
+cd web_version
+python -m http.server 8000 --bind 127.0.0.1   # 웹 버전 로컬 확인
 ```
 
 GitHub Pages 배포 설정은 아직 없습니다. Pages는 브랜치 방식으로 루트나 `/docs`만 올릴 수 있어서, `web_version/`을 올리려면 GitHub Actions 워크플로 등이 필요합니다.

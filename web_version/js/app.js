@@ -3,7 +3,7 @@
  * 그림판 화면: 마우스·터치로 그린 숫자를 브라우저 안에서 인식해 결과를 보여 준다.
  * 인식은 preprocess.js(전처리)와 model.js(추론)가 하고, 이 파일은 입력과 화면 갱신만 맡는다.
  */
-import { MNIST형식으로_변환 } from './preprocess.js';
+import { MNIST형식으로_변환, 잡음_제거 } from './preprocess.js';
 import { 모델_만들기, 소프트맥스 } from './model.js';
 
 const 붓두께 = 18; // desktop_version/app.py의 붓두께와 같다
@@ -21,6 +21,7 @@ const 상태 = document.getElementById('상태');
 
 let 모델 = null;
 let 이전좌표 = null;
+let 현재포인터ID = null; // 지금 획을 긋고 있는 손가락(또는 마우스·펜)의 id. 다른 포인터는 이 획이 끝날 때까지 무시한다.
 
 // ----- 확률 막대(0~9) 만들기 -----
 const 막대들 = [];
@@ -80,21 +81,25 @@ function 선긋기([x1, y1], [x2, y2]) {
 
 그림판.addEventListener('pointerdown', (이벤트) => {
   if (이벤트.button !== 0) return; // 왼쪽 버튼(터치·펜 포함)만 그린다
+  if (현재포인터ID !== null) return; // 이미 다른 손가락으로 획을 긋는 중이면 무시한다(멀티터치로 선이 섞이는 것을 막음)
   이벤트.preventDefault();
-  그림판.setPointerCapture(이벤트.pointerId);
+  현재포인터ID = 이벤트.pointerId;
+  그림판.setPointerCapture(현재포인터ID);
   이전좌표 = 캔버스좌표(이벤트);
   점찍기(이전좌표);
 });
 
 그림판.addEventListener('pointermove', (이벤트) => {
-  if (이전좌표 === null) return;
+  if (이벤트.pointerId !== 현재포인터ID || 이전좌표 === null) return;
   const 현재좌표 = 캔버스좌표(이벤트);
   선긋기(이전좌표, 현재좌표);
   점찍기(현재좌표);
   이전좌표 = 현재좌표;
 });
 
-function 그리기_끝() {
+function 그리기_끝(이벤트) {
+  if (이벤트.pointerId !== 현재포인터ID) return; // 지금 획을 긋고 있는 포인터가 아니면 무시한다
+  현재포인터ID = null;
   if (이전좌표 === null) return;
   이전좌표 = null;
   인식(); // 획을 하나 그을 때마다 자동으로 인식
@@ -108,7 +113,8 @@ function 인식() {
   const 픽셀 = 붓.getImageData(0, 0, 그림판.width, 그림판.height).data;
   const 흑백 = new Uint8Array(그림판.width * 그림판.height);
   for (let i = 0; i < 흑백.length; i++) 흑백[i] = 픽셀[i * 4]; // 흰 글씨라 빨강 채널 = 밝기
-  const 이미지 = MNIST형식으로_변환(흑백, 그림판.width, 그림판.height);
+  // 사생활 보호 모드 등 일부 브라우저는 getImageData에 잡음을 섞으므로, 옅은 값을 지운 뒤 전처리한다
+  const 이미지 = MNIST형식으로_변환(잡음_제거(흑백), 그림판.width, 그림판.height);
   if (이미지 === null) return;
 
   const 확률 = 소프트맥스(모델.추론(이미지));
@@ -148,7 +154,11 @@ document.addEventListener('keydown', (이벤트) => {
 // ----- 모델 불러오기 -----
 async function 모델_불러오기() {
   // 문서 기준 상대 경로라 GitHub Pages처럼 하위 경로에 올려도 동작한다
-  const [정보응답, 가중치응답] = await Promise.all([fetch('model/model.json'), fetch('model/weights.bin')]);
+  // 다시 내보낸 같은 크기의 weights.bin을 브라우저 캐시가 옛 모델로 착각하지 않도록 캐시를 쓰지 않는다
+  const [정보응답, 가중치응답] = await Promise.all([
+    fetch('model/model.json', { cache: 'no-cache' }),
+    fetch('model/weights.bin', { cache: 'no-cache' }),
+  ]);
   if (!정보응답.ok || !가중치응답.ok) {
     throw new Error(`모델 파일을 받지 못했습니다 (HTTP ${정보응답.status}, ${가중치응답.status})`);
   }
@@ -164,8 +174,7 @@ async function 모델_불러오기() {
     인식(); // 불러오는 동안 그려 둔 것이 있으면 바로 인식한다
   })
   .catch((오류) => {
+    // file://일 때의 안내는 index.html의 인라인 스크립트가 맡는다(이 모듈은 file://에서 아예 실행되지 않으므로).
     상태.classList.add('오류');
-    상태.textContent = location.protocol === 'file:'
-      ? 'index.html 파일을 직접 열면 모델을 불러올 수 없습니다. web_version 폴더에서 python -m http.server 를 실행한 뒤 http://localhost:8000 으로 열어 주세요.'
-      : `모델을 불러오지 못했습니다: ${오류.message}`;
+    상태.textContent = `모델을 불러오지 못했습니다: ${오류.message}`;
   });
