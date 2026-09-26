@@ -36,6 +36,8 @@ body {
 }
 
 .앱 { max-width: 720px; margin: 0 auto; padding: 24px 16px; }
+/* 페이지 맨 위의 학번과 이름 */
+.학생정보 { margin: 0 0 12px; font-size: 1rem; font-weight: 700; }
 h1 { font-size: 1.4rem; margin: 0 0 4px; }
 .설명 { margin: 0 0 20px; color: var(--흐린글자); font-size: 0.9rem; }
 .제목 { margin: 0 0 6px; font-size: 0.95rem; }
