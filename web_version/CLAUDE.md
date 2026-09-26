@@ -24,7 +24,7 @@ python -m http.server 8000 --bind 127.0.0.1   # 로컬 서버 → http://127.0.0
 ## 구조
 
 - **`js/preprocess.js`**(순수 함수): 280×280 흑백 배열 → 28×28 `Uint8Array`, 그린 것이 없으면 `null`.
-- **`js/model.js`**(순수 함수): `모델_만들기(model.json 내용, weights.bin ArrayBuffer)` → `{ 추론(28×28) }`. 정규화(평균·표준편차는 `model.json`에서 읽음)도 여기서 합니다.
+- **`js/model.js`**(순수 함수): `모델_만들기(model.json 내용, weights.bin ArrayBuffer)` → `{ 추론(28×28) → 로짓 10개 }`. 정규화(평균·표준편차는 `model.json`에서 읽음)도 여기서 합니다.
 - 두 모듈은 DOM·`fetch`를 쓰지 않으므로 브라우저와 Node 테스트에서 그대로 import됩니다. 이 성질을 유지하세요.
 - **`js/app.js`**: 화면·입력만 맡습니다.
   - Pointer Events로 마우스·터치를 함께 처리하고, 캔버스 `getImageData`의 빨강 채널을 흑백으로 씁니다.
